@@ -1,54 +1,59 @@
-import { useState } from 'react';
 import './Form.css';
-import validatePassword from '../../helper/passwordValidator';
-import validateEmail from '../../helper/emailValidator';
+import Input from '../Input/Input';
+import { useContext, useRef } from 'react';
+import { FormContext } from '../../providers/FormContext';
+
+import emailValidator from "../../helper/emailValidator";
+import passwordValidator from "../../helper/passwordValidator";
 
 
 function Form(){
 
-    const [formValues, setFormValues] = useState({
-        email: "",
-        password: ""
-    });
-
-    const handleValidatePassword = () => {
-        const password = formValues.password;
-        if(!validatePassword(password)){
-            console.log("Password invalid");
-        }
-    }
-
-    const handleValidateEmail = () => {
-        const email = formValues.email;
-        if(!validateEmail(email)){
-            console.log("Invalid email");
-        }
-    }
-
+    const {formInput} = useContext(FormContext);
+    const emailRef = useRef(null);
+    const passwordRef = useRef(null);
     const handleFormSubmit = (event) => {
         event.preventDefault();
-        handleValidatePassword();
-        handleValidateEmail();
-        console.log(formValues);
+        // we have access to formInput, that means validations can be done here.
+        handleInvalidEmail();
+        handleInvalidPassword();
+    }
+
+    const handleInvalidEmail = () => {
+        if(!emailValidator(formInput.email)) {
+            emailRef.current.setInvalid();
+            emailRef.current.shake();
+        }
+    }
+
+    const handleInvalidPassword = () => {
+        if(!passwordValidator(formInput.password)) {
+            passwordRef.current.setInvalid();
+            passwordRef.current.shake();
+        }
     }
 
     return(
         <div>
             New Form
-            <form onSubmit={handleFormSubmit}>
+            <form onSubmit={handleFormSubmit} noValidate>
                 <div className="wrapper email-input-wrapper">
-                    <input
-                        type="text"
-                        value={formValues.email}
-                        onChange={(event) => setFormValues({...formValues, email: event.target.value})}
+                    <Input
+                        id = "email-input"
+                        type="email"
+                        label="email"
+                        ref = {emailRef}
+                        checkOnBlur={ handleInvalidEmail }
                     />
                 </div>
 
                 <div className="wrapper password-input-wrapper">
-                    <input
+                    <Input
+                        id = "password-input"
                         type="password"
-                        value={formValues.password}
-                        onChange={(event) => setFormValues({...formValues, password: event.target.value})}
+                        label="password"
+                        ref = {passwordRef}
+                        checkOnBlur={ handleInvalidPassword }
                     />
                 </div>
 
